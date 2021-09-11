@@ -45,7 +45,7 @@ async function load(ip='1.1.1.1') {
   );
 
   const ipdec=ipInt(ip).toInt();
-  const result = await worker.db.query(`SELECT r.cidr,r.asN AS asn,r.dec_width AS ip_width,a.name FROM routeviews_ipv4 r JOIN asn_names a ON r.asN=a.asn WHERE ?>=r.dec_start AND ?<=r.dec_end GROUP BY r.asN,r.dec_width ORDER BY r.dec_width ASC LIMIT 10;`,[ipdec,ipdec]);
+  const result = await worker.db.query(`SELECT * FROM site_caida_rv2_pfx2as WHERE ?>=dec_start AND ?<=dec_end LIMIT 10;`,[ipdec,ipdec]);
 
   document.body.textContent = JSON.stringify(result);
 }
