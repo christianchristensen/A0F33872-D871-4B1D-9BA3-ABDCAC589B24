@@ -15,7 +15,7 @@ async function loadIP()
   else
   {
     var xmlhttp=new XMLHttpRequest();
-    xmlhttp.timeout=5000;
+    xmlhttp.timeout=3000; // 3s timeout, TODO: determine howto timeout/else into random ip
     xmlhttp.onreadystatechange=await function()
       {
         if (xmlhttp.readyState==4 && xmlhttp.status==200)
@@ -23,7 +23,7 @@ async function loadIP()
           load(xmlhttp.responseText);
         }
       };
-    xmlhttp.open("GET","//r2.csw.bz/ip",true);
+    xmlhttp.open("GET","//i.uti.ng",true);
     xmlhttp.send();
   }
 }
