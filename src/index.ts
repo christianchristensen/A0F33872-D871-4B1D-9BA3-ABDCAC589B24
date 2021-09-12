@@ -45,7 +45,7 @@ async function load(ip='1.1.1.1') {
   );
 
   const ipdec=ipInt(ip).toInt();
-  const result = await worker.db.query(`SELECT * FROM site_caida_rv2_pfx2as WHERE ?>=dec_start AND ?<=dec_end LIMIT 10;`,[ipdec,ipdec]);
+  const result = await worker.db.query(`SELECT * FROM site_caida_rv2_pfx2as WHERE ?>=dec_start AND ?<=dec_end ORDER BY dec_width ASC LIMIT 10;`,[ipdec,ipdec]);
 
   document.body.textContent = JSON.stringify(result);
 }
