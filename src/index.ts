@@ -23,7 +23,7 @@ async function loadIP()
           load(xmlhttp.responseText);
         }
       };
-    xmlhttp.open("GET","//i.uti.ng",true);
+    xmlhttp.open("GET","//i.uti.ng/ip",true);
     xmlhttp.send();
   }
 }
