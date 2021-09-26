@@ -6,33 +6,77 @@ const workerUrl = new URL(
 );
 const wasmUrl = new URL("sql.js-httpvfs/dist/sql-wasm.wasm", import.meta.url);
 
+async function load(){
+  loadIP();
+}
+
 async function loadIP()
 {
   if (window.location.hash)
   {
-    load(window.location.hash.substring(1));
+    // Fill IP on page...
+    var t_ip = window.location.hash.substring(1);
+    var d_t_ip = document.getElementById('t_ip');
+    if (d_t_ip != null) {
+      d_t_ip.textContent=t_ip;
+    }
+    loadASN(t_ip);
   }
   else
   {
-    var xmlhttp=new XMLHttpRequest();
-    xmlhttp.timeout=3000; // 3s timeout, TODO: determine howto timeout/else into random ip
-    xmlhttp.onreadystatechange=await function()
+    var xmlhttpIP=new XMLHttpRequest();
+    xmlhttpIP.timeout=3000; // 3s timeout, TODO: determine howto timeout/else into random ip
+    xmlhttpIP.onreadystatechange=await function()
       {
-        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+        if (xmlhttpIP.readyState==4 && xmlhttpIP.status==200)
         {
-          load(xmlhttp.responseText);
+          // Fill IP on page...
+          var t_ip = xmlhttpIP.responseText;
+          var d_t_ip = document.getElementById('t_ip');
+          if (d_t_ip != null) {
+            d_t_ip.textContent=t_ip;
+          }
+          loadASN(t_ip);
         }
       };
-    xmlhttp.open("GET","//i.uti.ng/ip",true);
-    xmlhttp.send();
+    xmlhttpIP.open("GET","//i.uti.ng/ip",true);
+    xmlhttpIP.send();
   }
 }
 
-async function load(ip='1.1.1.1') {
-  //document.getElementById("txtDiv").innerHTML=ip;
-  window.location.hash = ip;
-  const ipInt = require('ip-to-int');
+async function loadASN(ip='1.1.1.1')
+{
+  // reverse ip for DOH routeviews lookup
+  var is=ip.split('.');
+  var rip=is[3]+'.'+is[2]+'.'+is[1]+'.'+is[0];
+  var xmlhttpASN=new XMLHttpRequest();
+  xmlhttpASN.timeout=3000; // 3s timeout, TODO: determine howto timeout/else into random ip
+  xmlhttpASN.onreadystatechange=await function()
+    {
+      if (xmlhttpASN.readyState==4 && xmlhttpASN.status==200)
+      {
+        if (xmlhttpASN.responseText.includes('asn.routeviews')) {
+          // Fill ASN on page...
+          var asn = JSON.parse(xmlhttpASN.responseText).Answer[0].data.split('"');
+          var d_t_asn = document.getElementById('t_asn');
+          if (d_t_asn != null) {
+            d_t_asn.textContent=asn[1];
+          }
+          var d_t_subnet = document.getElementById('t_subnet');
+          if (d_t_subnet != null) {
+            d_t_subnet.textContent=asn[3] + "/" + asn[5];
+          }
 
+          loadSQL(asn[1]);
+        }
+      }
+    };
+  xmlhttpASN.open("GET","//d.uti.ng?name="+rip,true);
+  xmlhttpASN.setRequestHeader('Accept', 'application/dns-json');
+  xmlhttpASN.send();
+}
+
+async function loadSQL(asn=13335) {
   const worker = await createDbWorker(
     [
       {
@@ -44,10 +88,11 @@ async function load(ip='1.1.1.1') {
     wasmUrl.toString()
   );
 
-  const ipdec=ipInt(ip).toInt();
-  const result = await worker.db.query(`SELECT * FROM site_caida_rv2_pfx2as WHERE ?>=dec_start AND ?<=dec_end ORDER BY dec_width ASC LIMIT 10;`,[ipdec,ipdec]);
-
-  document.body.textContent = JSON.stringify(result);
+  const result = await worker.db.query(`SELECT name FROM asn_names WHERE asn=? LIMIT 10;`,[asn]);
+  var d_t_asname = document.getElementById('t_asname');
+  if (d_t_asname != null) {
+    d_t_asname.textContent=JSON.stringify(result[0]).split('"')[3];
+  }
 }
 
-loadIP();
+load();

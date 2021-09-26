@@ -1,9 +1,40 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="./dist/bundle.js"></script>
+    <style>
+      .styled-table {
+          border-collapse: collapse;
+          margin: 25px 0;
+          font-size: 0.9em;
+          font-family: sans-serif;
+          min-width: 400px;
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+      }
+    </style>
   </head>
   <body>
-    <div id="txtDiv">...</div>
+    <center>
+    <table class="styled-table">
+        <tbody>
+            <tr>
+                <td>IP</td>
+                <td><div id="t_ip"></div></td>
+            </tr>
+            <tr>
+                <td>ASN</td>
+                <td><div id="t_asn"></div></td>
+            </tr>
+            <tr>
+                <td>Subnet</td>
+                <td><div id="t_subnet"></div></td>
+            </tr>
+            <tr>
+                <td>Name</td>
+                <td><div id="t_asname"></div></td>
+            </tr>
+        </tbody>
+    </table>
+    </center>
   </body>
+  <script src="./dist/bundle.js"></script>
 </html>
