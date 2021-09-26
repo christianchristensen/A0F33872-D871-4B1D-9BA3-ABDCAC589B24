@@ -46,6 +46,8 @@ async function loadIP()
 
 async function loadASN(ip='1.1.1.1')
 {
+  // Save ip to URL/window hash
+  window.location.hash = ip;
   // reverse ip for DOH routeviews lookup
   var is=ip.split('.');
   var rip=is[3]+'.'+is[2]+'.'+is[1]+'.'+is[0];
