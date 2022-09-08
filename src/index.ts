@@ -39,7 +39,7 @@ async function loadIP()
           loadASN(t_ip);
         }
       };
-    xmlhttpIP.open("GET","//i.uti.ng/ip",true);
+    xmlhttpIP.open("GET","//i.b.uti.ng/ip",true);
     xmlhttpIP.send();
   }
 }
@@ -48,9 +48,20 @@ async function loadASN(ip='1.1.1.1')
 {
   // Save ip to URL/window hash
   window.location.hash = ip;
+  var rip=ip;
   // reverse ip for DOH routeviews lookup
-  var is=ip.split('.');
-  var rip=is[3]+'.'+is[2]+'.'+is[1]+'.'+is[0];
+  if (ip.includes(':')) {
+    var isip='';
+    var is=ip.split(':');
+    for (var i=0; i<is.length; i++) {
+      isip+=is[i].padStart(4, '0');
+    }
+    rip=isip.split('').reverse().join('.');
+  }
+  else {
+    var is=ip.split('.');
+    rip=is[3]+'.'+is[2]+'.'+is[1]+'.'+is[0];
+  }
   var xmlhttpASN=new XMLHttpRequest();
   xmlhttpASN.timeout=3000; // 3s timeout, TODO: determine howto timeout/else into random ip
   xmlhttpASN.onreadystatechange=await function()
@@ -71,9 +82,23 @@ async function loadASN(ip='1.1.1.1')
 
           loadSQL(asn[1]);
         }
+        if (xmlhttpASN.responseText.includes('origin6.asn.cymru')) {
+          // Process IPv6 to ASN response
+          var asn = JSON.parse(xmlhttpASN.responseText).Answer[0].data.split('"')[1].split('|');
+          var d_t_asn = document.getElementById('t_asn');
+          if (d_t_asn != null) {
+            d_t_asn.textContent=asn[0].trim();
+          }
+          var d_t_subnet = document.getElementById('t_subnet');
+          if (d_t_subnet != null) {
+            d_t_subnet.textContent=asn[1].trim();
+          }
+
+          loadSQL(asn[0].trim());
+        }
       }
     };
-  xmlhttpASN.open("GET","//d.uti.ng?name="+rip,true);
+  xmlhttpASN.open("GET","//d.b.uti.ng?name="+rip,true);
   xmlhttpASN.setRequestHeader('Accept', 'application/dns-json');
   xmlhttpASN.send();
 }
